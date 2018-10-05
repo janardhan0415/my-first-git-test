@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+
+    <style>
+
+        body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    @-webkit-keyframes animatezoom {
+            from {
+                -webkit-transform: scale(0)
+            }
+
+            to {
+                -webkit-transform: scale(1)
+            }
+        }
+
+        @keyframes animatezoom {
+            from {
+                transform: scale(0)
+            }
+
+            to {
+                transform: scale(1)
+            }
+        }
+
+        /* Change styles for span and cancel button on extra small screens */
+
+        @media screen and (max-width: 300px) {
+            span.psw {
+                display: block;
+                float: none;
+            }
+
+            .cancelbtn {
+                width: 100%;
+            }
+        }
+
+        
+        /* Extra styles for the cancel button */
+
+        .cancelbtn {
+            width: auto;
+            padding: 10px 18px;
+            background-color: #f44336;
+        }
+
+        /* Center the image and position the close button */
+
+        .imgcontainer {
+            text-align: center;
+            margin: 24px 0 12px 0;
+            position: relative;
+        }
+
+        img.avatar {
+            width: 40%;
+            border-radius: 50%;
+        }
+
+        .container {
+            padding: 16px;
+        }
+
+        span.psw {
+            float: right;
+            padding-top: 16px;
+        }
+
+        /* The Modal (background) */
+
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+            padding-top: 60px;
+        }
+
+        /* Modal Content/Box */
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto 15% auto;
+            /* 5% from the top, 15% from the bottom and centered */
+            border: 1px solid #888;
+            width: 80%;
+            /* Could be more or less, depending on screen size */
+        }
+
+        /* The Close Button (x) */
+
+        .close {
+            position: absolute;
+            right: 25px;
+            top: -15px;
+            color: #000;
+            font-size: 35px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: red;
+            cursor: pointer;
+        }
+
+        /* Add Zoom Animation */
+
+        .animate {
+            -webkit-animation: animatezoom 0.6s;
+            animation: animatezoom 0.6s
+        }
+
+        .table {
+            margin-left: 5%;
+            margin-right: 5%;
+            margin-top: 2%;
+            border: 1px solid rgba(223, 221, 221, 0.911);
+        }
+
+        .pagination{
+            margin-left: 71.5%;
+            margin-right: 5%;
+        }
+    </style>
+
+</head>
+
+<body onload="PopulateDropDownList()">
+
+    <h2> DCG Video Live Services Controller </h2>
+
+    <hr>
+
+    <table id="chTable" class="table" style="width:90%;">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Channel Name</th>
+                <th scope="col">Channel Status</th>
+                <th scope="col">Channel Start</th>
+                <th scope="col">Channel Stop</th>
+
+            </tr>
+        </thead>
+        <tbody id="chTableBody">
+
+        </tbody>
+
+    </table>
+    </br>
+    </br>
+
+    <button onclick="document.getElementById('id02').style.display='block',startAllChannels()" type="button" class="btn btn-outline-primary"
+        style="margin-left: 60%; margin-right: 5%;">Start
+        All
+        Channels</button>
+    <button onclick="document.getElementById('id03').style.display='block',stopAllChannels()" type="button" class="btn btn-outline-danger">Stop
+        All Channels</button>
+
+
+    <div id="id01" class="modal">
+
+        <form class="modal-content animate" action="/action_page.php">
+            <div class="imgcontainer">
+                <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+                <p id="pid1"></p>
+            </div>
+
+        </form>
+    </div>
+
+    <div id="id02" class="modal">
+
+        <form class="modal-content animate" action="/action_page.php">
+            <div class="imgcontainer">
+                <span onclick="document.getElementById('id02').style.display='none'" class="close" title="Close Modal">&times;</span>
+                <p id="pid2"></p>
+            </div>
+
+        </form>
+    </div>
+
+    <div id="id03" class="modal">
+
+        <form class="modal-content animate" action="/action_page.php">
+            <div class="imgcontainer">
+                <span onclick="document.getElementById('id03').style.display='none'" class="close" title="Close Modal">&times;</span>
+                <p id="pid3"></p>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+
+        function getListofChannels() {
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // alert(this.responseText);
+                }
+            };
+            xhttp.open("GET", "https://7osv7l7ec1.execute-api.us-west-2.amazonaws.com/prod/channel-list", false);
+            xhttp.setRequestHeader("Content-type", "application/json");
+            xhttp.send("Your JSON Data Here");
+            response = xhttp.responseText;
+
+            return response;
+
+        }
+
+        function PopulateDropDownList() {
+
+            var response = getListofChannels();
+
+            //console.log("response is " + response);
+
+            var jsonObj = JSON.parse(response);
+
+            //Build an array containing Customer records.
+            var customers = jsonObj.Channels;
+
+            //console.log("customers are " + customers);
+
+            var ddlCustomers = document.getElementById("chTable");
+
+            var table = document.getElementById("chTableBody");
+
+            var rowCount = 0;
+
+            //Add the Options to the DropDownList.
+            for (var i = 0; i < customers.length; i++) {
+
+                var row = table.insertRow(rowCount);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+                var cell4 = row.insertCell(3);
+                var cell5 = row.insertCell(4);
+                var cell6 = row.insertCell(5);
+
+
+                var chnID = customers[i].chId;
+
+                //console.log("chnID is " + chnID);
+
+                cell1.innerHTML = i + 1;
+                cell2.innerHTML = customers[i].chName;
+                cell3.innerHTML = '<button type="button" class="btn btn-warning" onclick="document.getElementById(\'id01\').style.display=\'block\',getStatus(this)">Status</button>';
+                cell4.innerHTML = '<button type="button" class="btn btn-success" onclick="document.getElementById(\'id02\').style.display=\'block\',startChannel(this)">Start</button>';
+                cell5.innerHTML = '<button type="button" value=chnID class="btn btn-danger" onclick="document.getElementById(\'id03\').style.display=\'block\',stopChannel(this)">Stop</button>';
+                cell6.innerHTML = chnID;
+                cell6.style.display = "none";
+
+                rowCount = rowCount + 1;
+
+            }
+        }
+
+        function getStatus(chRowID) {
+
+            var response = "Channel Status is : ";
+
+            var chRowIDd = chRowID.parentNode.parentNode.cells[5].textContent;
+
+            //console.log("chRowIDd is " + chRowIDd);
+
+            var channelId = chRowIDd;
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    //alert(this.responseText);
+                }
+            };
+            xhttp.open("GET", "https://3kzjgvvji2.execute-api.us-west-2.amazonaws.com/prod/get-status?data=" + encodeURIComponent(JSON.stringify({ "channelId": channelId })), false);
+            xhttp.setRequestHeader("Content-type", "application/json");
+            xhttp.send();
+            response = response + xhttp.responseText;
+            // alert(response);
+
+            document.getElementById("pid1").innerHTML = response;
+
+            return xhttp.responseText.replace(/"/g, "");;
+        }
+
+        function startChannel(chRowID) {
+            var response = "Starting Channel Service !!";
+
+            //alert(chRowID.parentNode.parentNode.cells[5].textContent);
+
+            var chRowIDd = chRowID.parentNode.parentNode.cells[5].textContent;
+
+            //console.log("chRowIDd is " + chRowIDd);
+
+            var channelId = chRowIDd;
+
+            //console.log("channelId is " + channelId);
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // alert(this.responseText);
+                }
+            };
+            xhttp.open("POST", "https://7rn4kenapc.execute-api.us-west-2.amazonaws.com/prod/start-channel", false);
+            xhttp.setRequestHeader("Content-type", "application/json");
+            xhttp.send(JSON.stringify({ "channelId": channelId }));
+            response = xhttp.responseText;
+            //alert(response);
+
+            document.getElementById("pid2").innerHTML = response;
+        }
+
+        function stopChannel(chRowID) {
+            var response = "Stopping Channel Service !!";
+            //alert(chRowID.parentNode.parentNode.cells[5].textContent);
+
+            var chRowIDd = chRowID.parentNode.parentNode.cells[5].textContent;
+
+            //console.log("chRowIDd is " + chRowIDd);
+
+            var channelId = chRowIDd;
+
+            //console.log("channelId is " + channelId);
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    //alert(this.responseText);
+                }
+            };
+            xhttp.open("POST", "https://6134u7tcdj.execute-api.us-west-2.amazonaws.com/prod/stop-channel", false);
+            xhttp.setRequestHeader("Content-type", "application/json");
+            xhttp.send(JSON.stringify({ "channelId": channelId }));
+            response = xhttp.responseText;
+            //alert(response);
+
+            document.getElementById("pid3").innerHTML = response;
+        }
+
+        function startAllChannels() {
+
+            var response = "Starting All Channel Services !!";
+            var getChannelsResObj = getListofChannels();
+
+            //console.log("getChannelsResObj is " + getChannelsResObj);
+
+            var jsonObj = JSON.parse(getChannelsResObj);
+            //Build an array containing Customer records.
+            var channelsObj = jsonObj.Channels;
+
+            //console.log("channelsObj is " + channelsObj);
+
+            for (var i = 0; i < channelsObj.length; i++) {
+
+                var channelId = channelsObj[i].chId;
+
+                //console.log("channelId is " + channelId);
+
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        // alert(this.responseText);
+                    }
+                };
+                xhttp.open("POST", "https://7rn4kenapc.execute-api.us-west-2.amazonaws.com/prod/start-channel", false);
+                xhttp.setRequestHeader("Content-type", "application/json");
+                xhttp.send(JSON.stringify({ "channelId": channelId }));
+                //response = xhttp.responseText;
+                //alert(response);
+            }
+
+            document.getElementById("pid2").innerHTML = response;
+        }
+
+        function stopAllChannels() {
+
+            var response = "Stopping All Channel Services !!";
+            var getChannelsResObj = getListofChannels();
+
+            //console.log("getChannelsResObj is " + getChannelsResObj);
+
+            var jsonObj = JSON.parse(getChannelsResObj);
+            //Build an array containing Customer records.
+            var channelsObj = jsonObj.Channels;
+
+            //console.log("channelsObj is " + channelsObj);
+
+            for (var i = 0; i < channelsObj.length; i++) {
+
+                var channelId = channelsObj[i].chId;
+
+                //console.log("channelId is " + channelId);
+
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        //alert(this.responseText);
+                    }
+                };
+                xhttp.open("POST", "https://6134u7tcdj.execute-api.us-west-2.amazonaws.com/prod/stop-channel", false);
+                xhttp.setRequestHeader("Content-type", "application/json");
+                xhttp.send(JSON.stringify({ "channelId": channelId }));
+                //response = xhttp.responseText;
+                //alert(response);
+            }
+            document.getElementById("pid3").innerHTML = response;
+        }
+
+        // Get the modal
+        var modal1 = document.getElementById('id01');
+        var modal2 = document.getElementById('id02');
+        var modal3 = document.getElementById('id03');
+
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            if (event.target == modal1) {
+                modal1.style.display = "none";
+            } else if (event.target == modal2) {
+                modal2.style.display = "none";
+            } else if (event.target == modal3) {
+                modal3.style.display = "none";
+            }
+        }
+
+        // Get the modal
+        var modal1 = document.getElementById('id01');
+        var modal2 = document.getElementById('id02');
+        var modal3 = document.getElementById('id03');
+
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            if (event.target == modal1) {
+                modal1.style.display = "none";
+            } else if (event.target == modal2) {
+                modal2.style.display = "none";
+            } else if (event.target == modal3) {
+                modal3.style.display = "none";
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
